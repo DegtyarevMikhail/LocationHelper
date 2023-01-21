@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "685647774311",
+    "firebase_url": "https://locationhelper-c20ba-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "locationhelper-c20ba",
+    "storage_bucket": "locationhelper-c20ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:685647774311:android:76bc3c5cd740c5745b0ac2",
+        "android_client_info": {
+          "package_name": "box.withitem.locationhelper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "685647774311-1g5a233thhaj4fdg2e569gp8aia983h9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "box.withitem.locationhelper",
+            "certificate_hash": "da9e9c7f91eec2c5b4eeeec36871458c31e35455"
+          }
+        },
+        {
+          "client_id": "685647774311-nl68qs1ecga3a7mojn94fhpoi4tcic8j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQiR3wqcFWRNn1x3j5iwN4dKXY3qOvFCo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "685647774311-nl68qs1ecga3a7mojn94fhpoi4tcic8j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

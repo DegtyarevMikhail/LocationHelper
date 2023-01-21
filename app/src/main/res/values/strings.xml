@@ -5,4 +5,50 @@
     <string name="tracks">Tracks</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="location_disabled">Location disabled</string>
+    <string name="location_dialog_message">Do you want enable GPS?</string>
+    <string name="found_location">привет</string>
+
+
+    <string name="accident_list_title">Список ДТП</string>
+    <string name="gps_my_setting_button">Настройки</string>
+    <string name="gps_marker_button">Add Marker</string>
+    <!--<string name="init_check_location_settings_message_ok">Settings Location IS OK</string>-->
+    <string name="init_check_location_settings_message_ok">Настройки в норме</string>
+    <string name="add_on_failure_listener">Settings Location addOnFailureListener call settings</string>
+    <string name="map_fragment">Карта</string>
+    <!--Для окон маркера-->
+    <string name="add_marker">добавить дтп</string>
+    <string name="name_breakdown">поломка</string>
+    <string name="name_crash">дтп</string>
+    <string name="name_help">скорая</string>
+    <string name="what_happened_info_window">Что случилось:</string>
+    <string name="what_happened_info_frag">Что случилось в ДТП:</string>
+    <string name="aftermath_info_window">Последствия:</string>
+    <string name="aftermath_info_frag">Последствия:</string>
+    <string name="call_ambulance_info_window">Вызвана Скорая Помощь:</string>
+    <string name="call_ambulance_info_frag">Вызвана Скорая Помощь:</string>
+    <string name="note_info_window">Примечание:</string>
+    <string name="note_info_frag">Примечание:</string>
+    <string name="save_info_frag">сохранить</string>
+    <string name="cancel_info_frag">отмена</string>
+    <string name="yes_call_ambulance">ДА</string>
+    <string name="no_call_ambulance">НЕТ</string>
+    <string name="help_on_road">Помощь в пути</string>
+    <string name="text_for_share">ДТП с участием мотоцикла</string>
+
+    <!--Окно установок (Settings)-->
+    <string name="account_title">Аккаунт</string>
+    <string name="account_summary">Ваши настройки</string>
+    <string name="user_tittle">Пользователь</string>
+    <string name="user_tittle_out">Выйти из регистрации</string>
+    <string name="map_chose_tittle">Выберите тип карты</string>
+    <string name="scale_to_dpi">Масштаб в DPI</string>
+
+    <!--Сообщения для отправки sms-->
+    <string name="message_sent">Сообщение отправлено</string>
+    <string name="message_error_sos">Нужны правильные данные телефона… </string>
+
+    <string name="date_time">Date/Time:</string>
 </resources>
