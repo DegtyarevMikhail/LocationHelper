@@ -26,7 +26,29 @@
         tools:ignore="ContentDescription,MissingConstraints" />
 
 
-
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/ef_SOS"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_button_marker_margin_current_position"
+        android:alpha="@dimen/fab_alpha"
+        android:ellipsize="middle"
+        android:text="SOS"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:backgroundTint="@color/fab_color_SOS"
+        app:fabSize="mini"
+        app:fontFamily="@font/rationale"
+        app:iconTint="@color/icon_tint_fab"
+        app:iconTintMode="add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/SquareFABmyLocation"
+        app:strokeColor="@color/white"
+        app:strokeWidth="@dimen/fab_stroke_width"
+        tools:ignore="ContentDescription,MissingConstraints" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/ef_event_marker_add"
@@ -128,10 +150,35 @@
 
     </org.osmdroid.views.MapView>
 
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tv_speed_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/speed_text_margin"
+        android:text="100"
+        android:textSize="@dimen/tv_speed_text"
+        app:fontFamily="@font/rationale"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints"
+        tools:text="100"
+        />
 
-
-
-
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tv_debug_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/speed_text_margin"
+        android:text="0.0"
+        android:textColor="@color/red"
+        android:textSize="20sp"
+        app:fontFamily="@font/rationale"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_speed_text"
+        tools:ignore="MissingConstraints"
+        tools:text="lan:\nlon:\nzoom:"
+        android:visibility="visible"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

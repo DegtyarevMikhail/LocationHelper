@@ -7,8 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import box.withitem.locationhelper.databinding.ActivityMainBinding
-import box.withitem.locationhelper.fragments.RecyclerActivityFragment
-import box.withitem.locationhelper.fragments.MapFragment
+import box.withitem.locationhelper.fragments.MapScreenFragment
+import box.withitem.locationhelper.fragments.RecyclerViewFragment
+
 import box.withitem.locationhelper.fragments.SettingsFragment
 import box.withitem.locationhelper.model.location.LocationProviderChangedReceiver
 import box.withitem.locationhelper.utils.showFragment
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
 //            val response = result.idpResponse
             if (result.resultCode == RESULT_OK) {
-                showFragment(MapFragment.newInstance())
+                showFragment(MapScreenFragment.newInstance())
                 navigationMenu()
             } else {
                 Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show()
@@ -76,14 +77,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
             when (it.itemId) {
                 R.id.nav_bar_return_to_map -> {
-                    showFragment(MapFragment.newInstance())
+                    showFragment(MapScreenFragment.newInstance())
                 }
                 R.id.nav_bar_fab_my_setting_button -> {
                     showFragment(SettingsFragment())
                 }
                 R.id.nav_bar_accident_list_fragment_button -> {
                     //TODO отобразить фрагмент со списком
-                    showFragment(RecyclerActivityFragment())
+                    showFragment(RecyclerViewFragment())
                 }
 
             }

@@ -19,6 +19,5 @@ data class MarkerPoint(
     val severityAccident: SeverityAccident? = SeverityAccident.None,
     val callAmbulance: Boolean = false,
     val accidentNotes: String? = null
-): Parcelable
-
+) : Parcelable
 

@@ -128,15 +128,12 @@ fun mySOSMessage(phone: String, message: String, context: Context) {
 }
 
 
-/*
 fun shareUrl(context: Context, addressText: String) {
-*/
 /*  отправляем в гугл карты
     val gmmIntentUri = Uri.parse("geo:${addressText}")
     val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
     mapIntent.setPackage("com.google.android.apps.maps")
-    context.startActivity(mapIntent)*//*
-
+    context.startActivity(mapIntent)*/
 
 
     val sendIntent: Intent = Intent().apply {
@@ -145,14 +142,10 @@ fun shareUrl(context: Context, addressText: String) {
         putExtra(Intent.EXTRA_SUBJECT, "${R.string.text_for_share}")
         type = "text/plain"
     }
-    val shareIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-        Intent.createChooser(sendIntent, "${R.string.text_for_share}", null)
-    } else {
-        Intent.createChooser(sendIntent, "${R.string.text_for_share}", null)
-    }
+    val shareIntent = Intent.createChooser(sendIntent, "${R.string.text_for_share}", null)
     context.startActivity(shareIntent)
 }
-*/
+
 
 fun isDarkTheme(activity: Activity): Boolean {
     return activity.resources.configuration.uiMode and

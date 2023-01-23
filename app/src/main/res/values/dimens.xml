@@ -15,9 +15,11 @@
     <dimen name="fab_button_marker_margin">4dp</dimen>
     <dimen name="icon_size_button_add_marker">80dp</dimen>
     <dimen name="icon_size_button_current_position">24dp</dimen>
-    <dimen name="icon_size_button_add_marker_landscape">64dp</dimen>
+    <dimen name="icon_size_button_add_marker_landscape">58dp</dimen>
+    <!--или 64dp-->
     <dimen name="icon_size_button_marker">96dp</dimen>
-    <dimen name="icon_size_button_marker_landscape">64dp</dimen>
+    <dimen name="icon_size_button_marker_landscape">48dp</dimen>
+    <!--или 52dp-->
     <dimen name="fab_stroke_width">1dp</dimen>
     <dimen name="fab_alpha">0.8</dimen>
     <!--Данные для infoWindow и его редактирования-->
@@ -39,5 +41,9 @@
     <dimen name="button_edit_height">54dp</dimen>
     <dimen name="radius_edit_win_note">8dp</dimen>
     <dimen name="icon_width_stroke">25</dimen>
+    <!--Данные для окна "Без происшествий"-->
+    <dimen name="no_events_margin">10dp</dimen>
+    <dimen name="no_events_text_size">18sp</dimen>
+    <dimen name="no_events_min_height">100dp</dimen>
 
 </resources>

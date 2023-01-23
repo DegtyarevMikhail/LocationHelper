@@ -1,23 +1,23 @@
-package box.withitem.locationhelper.adapters
+package box.withitem.locationhelper.data
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import box.withitem.locationhelper.R
-import box.withitem.locationhelper.data.MarkerPoint
 import box.withitem.locationhelper.databinding.ListItemBinding
 import box.withitem.locationhelper.utils.*
-
+import java.util.*
 import com.google.firebase.auth.FirebaseAuth
 
 
 class RecyclerViewAdapter(private val listener: Listener) :
     ListAdapter<MarkerPoint, RecyclerViewAdapter.RecyclerViewHolder>(ExampleItemDiffCallback) {
+
+
     class RecyclerViewHolder(
         private val itemBinding: ListItemBinding,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
@@ -28,17 +28,67 @@ class RecyclerViewAdapter(private val listener: Listener) :
         @SuppressLint("SimpleDateFormat")
         fun bind(markerPoint: MarkerPoint, listener: Listener) = with(itemBinding) {
 
-            itemView.setOnClickListener {
-                listener.onClick(markerPoint)
+            if (user?.isAnonymous == false) {
+                itemView.setOnClickListener {
+                    listener.onClick(markerPoint)
+                }
             }
+
+            imageViewHelp.setOnClick {
+                listener.onClickCreateRoad(markerPoint)
+            }
+
+            imageViewGoToMarker.setOnClickListener {
+                listener.onClickImage(markerPoint)
+            }
+
             twEventTime.text = setDateTimeMarketPoint(markerPoint)
 
-            twWhatHappened.text = getAccidentDescription()[markerPoint.accidentDescription.toString()]
-
             val addressText =
-                getFullAddress(markerPoint.lat, markerPoint.lon, 1, itemBinding.root.context)!!
+                getFullAddress(markerPoint.lat, markerPoint.lon, 1, imageViewAmbulance.context)!!
             twAddress.text = addressText
+
+            imageViewShare.setOnClickListener {
+                val string = "${markerPoint.lat},${markerPoint.lon}"
+                shareUrl(it.context, string)
+            }
+
+            twWhatHappened.text =
+                getAccidentDescription()[markerPoint.accidentDescription.toString()]
+
+
             twAftermathInfo.text = getSeverityAccident()[markerPoint.severityAccident.toString()]
+
+            if (!markerPoint.accidentNotes.isNullOrEmpty()) {
+                twNote.isVisible = true
+                twNote.text = markerPoint.accidentNotes
+            }
+
+            if (markerPoint.callAmbulance) {
+                imageViewAmbulance.setImageResource(
+                    R.drawable.ic_baseline_add_alert_24_red
+                )
+            } else {
+                imageViewAmbulance.setImageResource(
+                    R.drawable.ic_baseline_add_alert_24_grey
+                )
+            }
+
+            if (markerPoint.pointState == PointState.Checked) {
+                imageViewHelp.setBackgroundResource(R.color.green)
+            } else {
+                imageViewHelp.background = null
+            }
+
+            if (markerPoint.accidentType == AccidentType.Accident) {
+                conLayout.setBackgroundResource(R.color.card_accident)
+            }
+            if (markerPoint.accidentType == AccidentType.Breakdown) {
+                conLayout.setBackgroundResource(R.color.card_breakdown)
+            }
+            if (markerPoint.accidentType == AccidentType.Ambulance) {
+                conLayout.setBackgroundResource(R.color.card_ambulance)
+            }
         }
 
 
@@ -75,4 +125,3 @@ class RecyclerViewAdapter(private val listener: Listener) :
     }
 
 }
-

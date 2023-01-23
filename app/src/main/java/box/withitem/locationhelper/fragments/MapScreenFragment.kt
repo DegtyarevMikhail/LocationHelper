@@ -2,10 +2,12 @@ package box.withitem.locationhelper.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.app.Activity.RESULT_OK
+
 import android.content.Intent
 import android.content.IntentSender
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -18,11 +20,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import box.withitem.locationhelper.R
 import box.withitem.locationhelper.app
 import box.withitem.locationhelper.data.Constants.DEFAULT_LOCATIONS_LAT
@@ -31,7 +36,8 @@ import box.withitem.locationhelper.data.Constants.DEFAULT_ZOOM
 import box.withitem.locationhelper.data.Constants.REQUEST_CHECK_SETTINGS
 import box.withitem.locationhelper.data.MapViewModel
 import box.withitem.locationhelper.data.MarkerPoint
-import box.withitem.locationhelper.databinding.FragmentMapBinding
+
+import box.withitem.locationhelper.databinding.MapScreenFragmentBinding
 import box.withitem.locationhelper.model.location.MyEventLocationSettingsChange
 import box.withitem.locationhelper.utils.*
 import com.google.android.gms.common.api.ResolvableApiException
@@ -63,14 +69,15 @@ lateinit var startRoad: Location
 
 
 @SuppressLint("RestrictedApi")
-class MapFragment : Fragment(R.layout.fragment_map) {
+class MapScreenFragment : Fragment(R.layout.map_screen_fragment) {
     lateinit var currentLocation: Location
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient //смотрим здесь
 
     //    private val geocoder: Geocoder by lazy { Geocoder(requireContext(), Locale.getDefault()) }
     //   private val map: MapView by lazy { binding.mapView }
-    private lateinit var map: MapView
+    private lateinit var mapfun: MapView
+
 
     //    private val mapControllerNew: IMapController by lazy { map.controller }
     private lateinit var mapControllerNew: IMapController
@@ -82,26 +89,26 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     private var marker: Marker? = null
     private var path1: Polyline? = null
     private val locationRequest: LocationRequest by lazy { createLocationRequest() }
-    private val preferences: SharedPreferences by lazy { androidx.preference.PreferenceManager(
-        requireContext()
-    ).sharedPreferences!! }
+    private val preferences: SharedPreferences by lazy { PreferenceManager(requireContext()).sharedPreferences!! }
     private val user by lazy { FirebaseAuth.getInstance().currentUser }
     private val model: MapViewModel by activityViewModels()
 
     private val TAG = "happy"
 
-    private var _binding: FragmentMapBinding? = null
+    private var _binding: MapScreenFragmentBinding? = null
     private val binding get() = _binding!!
 
     companion object {
 
         fun newInstance(): Fragment {
             val args = Bundle()
-            val fragment = MapFragment()
+            val fragment = MapScreenFragment()
             fragment.arguments = args
             return fragment
         }
     }
+
+    //    has comments
     init {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
@@ -122,10 +129,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
             }
 
             Timber.d("Разрешения предоставлены $allAreGranted")
-           /* Toast(requireActivity()).showCustomToast(
+            Toast(requireActivity()).showCustomToast(
                 "Разрешения предоставлены", 0, requireActivity()
             )
-*/
+
             if (allAreGranted) {
                 initCheckLocationSettings()
                 initMap() //если с настройками всё ок
@@ -146,28 +153,26 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        map = binding.mapView
+        mapfun = binding.mapView
 //Выбор TileSource. Меняется во фрагменте настроек. Значения находятся в arrays.xml, задаются в settings_fragment.xml
         when (preferences.getString("MapType", "MAPNIK")) {
-            "MAPNIK" -> {
-                map.setTileSource(TileSourceFactory.MAPNIK)
+            "MAPNIK" -> {mapfun.setTileSource(TileSourceFactory.MAPNIK)
                 // для ночного режима, пока не реализованно
                 //map.getOverlayManager().getTilesOverlay().setColorFilter(TilesOverlay.INVERT_COLORS)
                 //map.getOverlayManager().getTilesOverlay().setColorFilter(null)
             }
-            "OpenTopo" -> map.setTileSource(TileSourceFactory.OpenTopo)
-            "WIKIMEDIA" -> map.setTileSource(TileSourceFactory.WIKIMEDIA)
+            "OpenTopo" -> mapfun.setTileSource(TileSourceFactory.OpenTopo)
+            "WIKIMEDIA" -> mapfun.setTileSource(TileSourceFactory.WIKIMEDIA)
         }
 
-        model.liveMarker.observe(viewLifecycleOwner) {
-            if (it == null) return@observe
-            map.controller.animateTo(GeoPoint(it.lat, it.lon))
+        model.liveMarker.observe(viewLifecycleOwner){
+            if(it == null) return@observe
+            mapfun.controller.animateTo(GeoPoint(it.lat, it.lon))
         }
 
-        model.endPointMarker.observe(viewLifecycleOwner) {
+        model.endPointMarker.observe(viewLifecycleOwner){
             if (it == null) return@observe
             buildRoadToAccident(it)
         }
@@ -176,10 +181,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         binding.efAmbulance.isVisible = false
         binding.efBreakdown.isVisible = false
 
-        map.isTilesScaledToDpi =
+        mapfun.isTilesScaledToDpi =
             preferences.getBoolean("tileScaleToDPI", true) // изменение масштаба карты
-        map.setMultiTouchControls(true) // мультитач управление
-        mapControllerNew = map.controller
+        mapfun.setMultiTouchControls(true) // мультитач управление
+        mapControllerNew = mapfun.controller
 
         val appPerms = arrayOf( // массив разрешений
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -202,7 +207,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         binding.efCurrentPosition.setOnClickListener {
             mapControllerNew.setCenter(startPoint)
             getPositionMarker().position = startPoint
-            map.invalidate()
+            mapfun.invalidate()
         }
 
 //        model.getData().observe(viewLifecycleOwner, processDatabaseData())
@@ -225,9 +230,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         if (user?.isAnonymous == true) {
             binding.efEventMarkerAdd.isVisible = false
         } else {
-            map.isClickable
+            mapfun.isClickable
 
-            map.setOnTouchListener(View.OnTouchListener { _, motionEvent ->
+            mapfun.setOnTouchListener(View.OnTouchListener { _, motionEvent ->
                 when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
 
@@ -245,16 +250,40 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 false
             })
 
+            binding.efSOS?.setOnClickListener {
+                val permissionCheck = ContextCompat.checkSelfPermission(
+                    requireActivity(),
+                    Manifest.permission.SEND_SMS
+                )
+                if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                    val phone = preferences.getString("EditTextPhone", "")
+                    val message =
+                        "Я в беде: https://yandex.ru/maps/?ll=${startPoint.latitude},${startPoint.longitude},z=13"
+                    if (phone != null) {
+                        mySOSMessage(phone, message, requireActivity())
+                    } else {
+                        Toast.makeText(
+                            requireActivity(),
+                            "Укажите в настройках номер телефона близкого человека",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(
+                        requireActivity(), arrayOf(Manifest.permission.SEND_SMS), 101
+                    )
+                }
+            }
+
         }
     }
-
     private fun buildRoadToAccident(endRoad: MarkerPoint) {
         deleteRouteToAccident()
 
         val startPoint = GeoPoint(startRoad.latitude, startRoad.longitude)
         val endPoint = GeoPoint(endRoad.lat, endRoad.lon)
 
-        val roadManager: RoadManager = OSRMRoadManager(requireContext(), BuildConfig.BUILD_TYPE)
+        val roadManager: RoadManager = OSRMRoadManager(requireContext(), box.withitem.locationhelper.BuildConfig.BUILD_TYPE)
         val waypoints = ArrayList<GeoPoint>()
         waypoints.add(startPoint)
         waypoints.add(endPoint)
@@ -292,15 +321,15 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     private fun processDatabaseData(): Observer<List<MarkerPoint>> {
         val dataObserver = Observer<List<MarkerPoint>> { t ->
 
-            map.overlays.forEach {
+            mapfun.overlays.forEach {
                 if ((it is Marker) && (it.id != "MyLocation")) {
-                    map.overlays.remove(it)
-                    map.invalidate()
+                    mapfun.overlays.remove(it)
+                    mapfun.invalidate()
                 }
             }
 
             t?.forEach { markerPoint ->
-                val markerDB = Marker(map, requireContext())
+                val markerDB = Marker(mapfun, requireContext())
                 markerDB.apply {
                     id = markerPoint.timestamp.toString()
                     position.latitude = markerPoint.lat
@@ -339,22 +368,26 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                         }
                     }
 
+                    val infoWindow = activity?.let { MarkerWindow(mapfun, markerPoint, it) }
+
+                    this.infoWindow = infoWindow
+
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 }
-                map.overlays.add(markerDB)
-                map.invalidate()
+                mapfun.overlays.add(markerDB)
+                mapfun.invalidate()
             }
-            map.invalidate()
+            mapfun.invalidate()
         }
         return dataObserver
     }
 
     //    Функция для добавления и отправки маркера.
-    fun addEvent(accidentType: AccidentType) {
+    private fun addEvent(accidentType: AccidentType) {
         user.let {
             if (!user?.email.isNullOrEmpty() or (user?.isAnonymous == false)) {
 
-                val marker = Marker(map)
+                val marker = Marker(mapfun)
                 marker.icon = when (accidentType) {
                     AccidentType.Breakdown -> ResourcesCompat.getDrawable(
                         resources, R.drawable.ico_moto_breakdown_36, null
@@ -373,8 +406,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 marker.title =
                     "lan: ${marker.position.latitude}, lon: ${marker.position.longitude}\n time: ${dateTimeEvent()}"
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                map.overlays.add(marker)
-                map.invalidate()
+                mapfun.overlays.add(marker)
+                mapfun.invalidate()
 
 //            Добавление маркера в БД. timestamp - id точки в БД.
                 val timestamp = Timestamp(Date().time).time
@@ -403,7 +436,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         Toast.makeText(requireContext(), "Location", Toast.LENGTH_SHORT).show()
         mapControllerNew.setCenter(startPoint)
         getPositionMarker().position = startPoint
-        map.invalidate()
+        mapfun.invalidate()
     }
 
     //has comments
@@ -493,7 +526,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         super.onActivityResult(requestCode, resultCode, data)
         Timber.d("Settings onActivityResult for $requestCode result $resultCode")
         if (requestCode == REQUEST_CHECK_SETTINGS) {
-            if (resultCode == Activity.RESULT_OK) {
+            if (resultCode == RESULT_OK) {
                 initMap()
             }
         }
@@ -502,17 +535,25 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     //     обновляем текущую геопозицию
     fun updateLocation(newLocation: Location) {
         lastLocation = newLocation
-
+        binding.tvDebugInfo.text = buildString {
+            append("lat:${newLocation.latitude}\n")
+            append("lon:${newLocation.longitude}\n")
+            append("speed (m/sec):${newLocation.speed}\n")
+        }
+        binding.tvSpeedText.text = buildString {
+            append(((newLocation.speed) * 60 * 60 / 1000).toInt())
+            append("km")
+        }
         startRoad = newLocation
         startPoint.longitude = newLocation.longitude
         startPoint.latitude = newLocation.latitude
         mapControllerNew.setCenter(startPoint)
         getPositionMarker().position = startPoint
-        map.invalidate()
+        mapfun.invalidate()
     }
 
     //has comments
-    fun initMap() {
+    private fun initMap() {
         initLocation()
         if (!requestingLocationUpdates) {
             requestingLocationUpdates = true
@@ -520,16 +561,16 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         }
 
         mapControllerNew.setZoom(DEFAULT_ZOOM)
-        map.zoomController.display.setPositions(
+        mapfun.zoomController.display.setPositions(
             false, CustomZoomButtonsDisplay.HorizontalPosition.RIGHT, CustomZoomButtonsDisplay.VerticalPosition.CENTER
         )
-        map.overlays.add(CopyrightOverlay(requireContext())) //копирайт
+        mapfun.overlays.add(CopyrightOverlay(requireContext())) //копирайт
         mapControllerNew.setCenter(startPoint)
-        map.invalidate()
+        mapfun.invalidate()
     }
 
     //     отрисовка маршрута проезда
-    fun getPath(): Polyline { //Singleton
+    private fun getPath(): Polyline { //Singleton
         if (path1 == null) {
             path1 = Polyline()
             with(path1!!) {
@@ -537,16 +578,36 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 outlinePaint.strokeWidth = 10f
                 addPoint(startPoint.clone())
             }
-            map.overlayManager.add(path1)
+            mapfun.overlayManager.add(path1)
         }
         return path1!!
     }
 
     //     маркер текущей геопозиции
-    fun getPositionMarker(): Marker { //Singleton
+    private fun getPositionMarker(): Marker { //Singleton
+// ===
+/*
 
         if (marker == null) {
             marker = Marker(map)
+
+            with(marker!!) {
+                id = "MyLocation"
+                title =
+                    "lan: ${startPoint.latitude}, lon: ${startPoint.longitude}\n time: ${dateTimeEvent()}"
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                icon = ResourcesCompat.getDrawable(resources, (R.drawable.dot), null)
+            }
+            Log.d(TAG, "getPositionMarker() called: $marker")
+//            map.overlays.add(marker)
+        }
+
+*/
+
+
+        // ===
+        if (marker == null) {
+            marker = Marker(mapfun)
 //            Log.d(TAG, "getPositionMarker() called: $marker")
         }
         marker!!.apply {
@@ -557,7 +618,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
             icon = ResourcesCompat.getDrawable(resources, (R.drawable.dot), null)
         }
 
-        map.overlays.add(marker)
+        mapfun.overlays.add(marker)
 
 //        Log.d(TAG, "getPositionMarker() marker ЕСТЬ ===========> ${marker!!.id}")
 
@@ -567,7 +628,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMapBinding.inflate(inflater, container, false)
+        _binding = MapScreenFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
